@@ -1,0 +1,44 @@
+------------
+> Playwright
+------------
+> Reliable End-to-End Testing - Autowait capability (Time depends on global wait)
+FOr Seleniu need to handle this explicitly.
+> Cross Browser compatability
+> Multiplatform Support - Windows, MacOs, Linux
+> Multi lingual Flexibility - JS, TS, Python, Java & C#(.Net)
+Cypress only support JS & TS ad it is JS based testing FW.
+
+
+> Playwright's Advanced Features
+--------------------------------
+> Tracking & debugging: Provides automatic Screenshots, video recordings & comprehensive logging without explicitly mentioning.
+> Network Interception: Mocking and Intercepting. 
+> Browser Context Managenent: If logged in normal browser, that session's cookies are handled automatically to launch application same in incognito 
+> Codegen Tool: Generate tests by recording actions.
+
+
+> Node.js
+----------
+An open-source, cross-platform, back-end JavaScript runtime Environment that runs on the V8 engine and executes JS code outside browser.
+
+> VS Code
+----------
+Best IDE developed by MicroSoft famously used for JS related projects
+/* node package manager will initializes a new Node.js project. Its primary function is to create a package.json file in the current directory, which serves as a manifest for the project. This file contains metadata about the project and manages its dependencies*/
+
+> npm init – creates package.json file
+> npm install @playwright/test – downloads and add playwright version in package.json
+> npx playwright install – downloads all browsers for playwright testing
+
+node_modules - all playwright jars installed in this folder
+tests - the script which we add in this to run the test
+playwright.config.ts - TestRunner file
+File name suffix should be .spec.ts or .test.ts to run from command line 
+
+To run in headed mode - npx playwright test –headed
+To run in specific browser - npx playwright test --headed --browser=firefox
+To run all browsers - npx playwright test --headed --browser=all
+To run from specific file - npx playwright test tests/example.spec.ts
+
+
+
