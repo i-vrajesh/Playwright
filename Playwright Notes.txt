@@ -24,21 +24,51 @@ An open-source, cross-platform, back-end JavaScript runtime Environment that run
 > VS Code
 ----------
 Best IDE developed by MicroSoft famously used for JS related projects
-/* node package manager will initializes a new Node.js project. Its primary function is to create a package.json file in the current directory, which serves as a manifest for the project. This file contains metadata about the project and manages its dependencies*/
-
-> npm init – creates package.json file
-> npm install @playwright/test – downloads and add playwright version in package.json
-> npx playwright install – downloads all browsers for playwright testing
+node package manager will initializes a new Node.js project. Its primary function is to create a package.json file in the current directory, 
+which serves as a manifest for the project. 
 
 node_modules - all playwright jars installed in this folder
 tests - the script which we add in this to run the test
-playwright.config.ts - TestRunner file
-File name suffix should be .spec.ts or .test.ts to run from command line 
-
-To run in headed mode - npx playwright test –headed
-To run in specific browser - npx playwright test --headed --browser=firefox
-To run all browsers - npx playwright test --headed --browser=all
-To run from specific file - npx playwright test tests/example.spec.ts
+package.json - This file contains metadata about the project and manages its dependencies 
+playwright.config.ts - TestRunner file (File name suffix should be .spec.ts or .test.ts to run from command line)
 
 
+> npm init 					//creates package.json file
+> npm install @playwright/test 			//downloads and add playwright version in package.json
+> npx playwright install 			//downloads all browsers for playwright testing
+> npx playwright test –headed 			//To run in headed mode
+> npx playwright test --headed --browser=firefox //To run in specific browser
+> npx playwright test --headed --browser=all 	//To run all browsers
+> npx playwright test tests/example.spec.ts 	//To run from specific file
+
+
+--------------------------
+const {test} = require('@playwright/test');
+test('Test Title',async ()=> {
+//each line await added to wait completing previous line
+//if we write await in method/function, then it should be changed to async function - async & await comes as combination
+//await activated only if we mark function as async
+//()=> anonymous function(Fat operator)
+}
+
+----------------------------------
+> Browser Context and PageFixtures
+-----------------------------------
+//Below both are same, playwrihght automatically manage page if we won't specify context options
+
+test("Browser Invoke1", async ({browser})=>{ //here {browser} is a playwright global fixture (nothing global variable available across whole project)
+    const context = browser.newContext();
+    const page = context.newPage();
+    await page.goto("http://www.rahulshettyacademy.com/loginpagePractise/");
+}); 
+
+test("Browser Invoke2", async ({page})=>{  
+    await page.goto("http://www.rahulshettyacademy.com/loginpagePractise/");
+});
+
+------------
+test.only
+-----------
+test.only("Browser Invoke2", async ({page})=>{  
+//when we want to run only 1 TC deom entire file, then test.only partivular test will execute
 
