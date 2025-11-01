@@ -1,6 +1,6 @@
--------------
-> Playwright:
--------------
+-----------------------------------------------
+> Playwright: https://playwright.dev/docs/intro
+-----------------------------------------------
 > Reliable End-to-End Testing - Autowait capability (Time depends on global wait)
 FOr Seleniu need to handle this explicitly.
 > Cross Browser compatability
@@ -29,13 +29,14 @@ Best IDE developed by MicroSoft famously used for JS related projects
 Its primary function is to create a package.json file in the current directory, which serves as a manifest for the project. 
 This file contains metadata about the project and manages its dependencies */
 
-> npm init 					                    //creates package.json file
-> npm install @playwright/test 			        //downloads and add playwright version in package.json
-> npx playwright install 			            //downloads all browsers for playwright testing
-> npx playwright test –headed 			        //To run in headed mode
+> npm init 					//creates package.json file
+> npm install @playwright/test 			//downloads and add playwright version in package.json
+> npx playwright install 			//downloads all browsers for playwright testing
+> npx playwright test –headed 			//To run in headed mode
 > npx playwright test --headed --browser=firefox //To run in specific browser
 > npx playwright test --headed --browser=all 	//To run all browsers
 > npx playwright test tests/example.spec.ts 	//To run from specific file
+> npx playwright test --ui			//opens Ui test runner for entore tests folder
 
 --------------------------
 const {test} = require('@playwright/test');
@@ -97,28 +98,29 @@ The await keyword explicitly tells the test script to pause and wait for that Pr
 interacting with a web browser involves waiting for commands to be sent and for the browser to respond.
 
 Asynchronous actions	: Browser operations like page.goto(), page.click(), or page.fill() take time to complete. 
-			              They return a Promise, and without await, the script would move on before the action is finished, causing flaky tests.
+			  They return a Promise, and without await, the script would move on before the action is finished, causing flaky tests.
 Sequential execution	: Using await pauses your script until the previous browser action is confirmed as complete. 
-			              This ensures actions execute in the correct order, making tests reliable and predictable.
-Clearer code		    : async/await makes asynchronous code read like synchronous code, which greatly improves readability and maintainability. 
+			  This ensures actions execute in the correct order, making tests reliable and predictable.
+Clearer code		: async/await makes asynchronous code read like synchronous code, which greatly improves readability and maintainability. 
 
 ---------
 > Waits:
 ---------
-    await page.waitForLoadState('networkidle'); 	    // wait till all api calls completed in backed
+    await page.waitForLoadState('networkidle'); 	// wait till all api calls completed in backed
     await page.waitForLoadState('domcontentloaded'); 	// wait till dom content loaded
-    await page.waitForLoadState('load');		        // to pause execution until the entire web page has finished loading all its resources.
-    cardTitles.waitFor();				                // simply wait for that locator
+    await page.waitForLoadState('load');		// to pause execution until the entire web page has finished loading all its resources.
+    cardTitles.waitFor();				// simply wait for that locator
     console.log(await cardTitles.allTextContents());	// allTextContents method doesn't have automatic wait, bcoz we are specifically targetting to one element
 
 -----------
 > Locators:
 -----------
-If ID is present 				                - css -> tagname#id (or) #id
-If class is present 				            - css -> tagname.class (or) .class
-Write css based on any attribute 		        - css -> [attribute='value']
+If ID is present 				- css -> tagname#id (or) #id
+If class is present 				- css -> tagname.class (or) .class
+Write css based on any attribute 		- css -> [attribute='value']
 Write css with traversing from Parent to child 	- css -> parenttagname >> childtagname
-If needs to write locator based on text 	    - css -> text=''
+If needs to write locator based on text 	- css -> text=''
+
 
 --------------------
 > type() and fill():
@@ -138,3 +140,110 @@ If needs to write locator based on text 	    - css -> text=''
 -----------------------
     await page.pause(); 		// will launch playwright inspector like debugging
 
+-------------------------
+> Finding locator with text
+--------------------------
+await page.locator("text= Add To Cart").click(); //applicable to whole page
+await page.locator("h3:has-text('Zara Coat 4')").click(); //applicable to whole page with specific tag (called as pseudo class)
+
+----------------------------------------------
+> Auto Suggestive dropdowns/ Dynamic dropdowns
+----------------------------------------------
+pressSequentially : similar to type or fill
+
+   await page.locator("[placeholder*='Country']").pressSequentially("ind");
+   await page.locator("[placeholder*='Country']").pressSequentially("ind", { delay: 150 });
+   const dropdown = page.locator(".ta-results");
+    await dropdown.waitFor();
+    const optionsCount = dropdown.locator("button").count();
+    for(let i=0; i<optionsCount;i++){
+        const text = await dropdown.locator("button").nth(i).textContent();
+        if(text === " India"){
+            await dropdown.locator("button").nth(i).click();
+            break;
+        }
+    }
+
+Here, a delay of 150 milliseconds is introduced between each key press.
+That means it enters  i → (delay 150 ms) → enters n → (delay 150 ms) → enters d
+
+------------------
+> Normal dropdown:
+------------------
+await page.getByLabel("Gender").selectOption("Female");//selectOPtion only works if element located in <select> tag
+
+------------
+> Locators:
+------------
+In general day to day life project framework most common suggested locator is css or xpath, below are extra benefitial locator methods
+
+page.getByRole() 	- to locate by explicit and implicit accessibility attributes.
+page.getByText() 	- to locate by text content.
+page.getByLabel() 	- to locate a form control by associated label's text.
+page.getByPlaceholder() - to locate an input by placeholder.
+page.getByAltText() 	- to locate an element, usually image, by its text alternative.
+page.getByTitle() 	- to locate an element by its title attribute.
+page.getByTestId() 	- to locate an element based on its data-testid attribute (other attributes can be configured).
+oage.locator()		- default for css and xpath
+
+<input class="btn btn-success" type="submit" value="Submit">//it need not be <button> tag, btn class is enough to identify
+await page.getByRole("button",{name:'Submit'}).click();
+
+<any tag>Success</any tag> 
+await page.getByText("Success").isVisible();//will search in entire page like contains(text(),'')
+
+<label class="form">Check me out if you Love IceCreams!</label>
+await page.getByLabel("Check me out if you Love IceCreams!").check();
+
+<input class="form" id="password" placeholder="Password" type="password">
+await page.getByPlaceholder("Password").fill("admin123");
+
+<label for="exampleFormControl">Gender</label>
+await page.locator("app-card").filter({hasText:'Gender', has:'', hasNot:'', hasNotText:'Email'}).getByRole("button",{name:"Add to Cart"}).click(); //4 filters
+
+-------------
+> Calenders:
+--------------
+
+
+-------------------
+> Back and Forward
+-------------------
+    await page.goBack();
+    await page.goForward();
+
+-----------------
+> Alert & Popups
+-----------------
+In playwright we call as dialouges
+page.on()//on method waits to listen for events to occur
+
+    await page.on('dialog',dialoug => dialoug.accept());
+    await page.on('dialog',dialoug => dialoug.dismiss());
+
+--------
+> Hover
+--------
+await page.locator("#mousehover").hover();
+
+---------
+> Frames
+---------
+
+    const framesPage = page.frameLocator("#courses-iframe"); //switching from page to framesPage
+    await framesPage.locator("li a[href*='lifetime-access']:visible").click();//performing using framesPage
+
+--------------
+> API Testing
+---------------
+const {request} = require('@playwright/test'); //request need to import for api testing
+
+-------------
+> Screenshot
+---------------
+
+await page.locator("#id").screenshot({path:locatorScreenshot.png}); //locator level
+await page.screenshot({path:screenshot.png}); //page level
+
+//visual testing.. matching exact locator visual representation to older img
+expect(await page.screenshot()).toMatchSnapshot("landing.png");//comparing with old png
