@@ -2,7 +2,7 @@
 > Playwright: https://playwright.dev/docs/intro
 -----------------------------------------------
 > Reliable End-to-End Testing - Autowait capability (Time depends on global wait)
-FOr Seleniu need to handle this explicitly.
+FOr Selenium need to handle this explicitly.
 > Cross Browser compatability
 > Multiplatform Support - Windows, MacOs, Linux
 > Multi lingual Flexibility - JS, TS, Python, Java & C#(.Net)
@@ -170,7 +170,7 @@ That means it enters  i → (delay 150 ms) → enters n → (delay 150 ms) → e
 ------------------
 > Normal dropdown:
 ------------------
-await page.getByLabel("Gender").selectOption("Female");//selectOPtion only works if element located in <select> tag
+await page.getByLabel("Gender").selectOption("Female");//selectOption only works if element located in <select> tag
 
 ------------
 > Locators:
@@ -247,3 +247,429 @@ await page.screenshot({path:screenshot.png}); //page level
 
 //visual testing.. matching exact locator visual representation to older img
 expect(await page.screenshot()).toMatchSnapshot("landing.png");//comparing with old png
+
+
+-----------
+> ExcelJS
+----------
+add this plugin in package.json to handle with xcel and json
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download'}).click();
+  await downloadPromise;//wait till download is fullfilled/resolved
+
+  const ExcelJs =require('exceljs');
+  const workbook = new ExcelJs.Workbook();
+  await workbook.xlsx.readFile(filePath);
+  const worksheet = workbook.getWorksheet('Sheet1');
+
+
+---------------------
+> Data driven Testing
+---------------------
+
+Use JSON in different folder as data file
+{
+    "userName":"admin",
+    "password":"pass123"
+}
+
+const data = JSON.parse(JSON.stringify(require("../utils/data.json")));
+//converting to stringify to remove unnecessary upcoming issues related to UTF-8 encoding amd later we convert to js objects using JSON.parse to convert from JSON to js object
+
+Now in methods we can use data.userName, data.password
+
+-----------------------------------------------
+> Parameterize tests with different data sets
+-----------------------------------------------
+//Repeat test with multiple testdatas
+
+Like earlier usage
+implement multiple data sets inside JSON
+
+[
+  {
+    "userName": "admin1",
+    "password": "pass123"
+  },
+  {
+    "userName": "admin2",
+    "password": "pass1234"
+  }
+]
+
+//After calling that file and storing it in data variable apply for loop outside test
+
+const data = JSON.parse(JSON.stringify(require("../utils/data.json")));
+
+for(const d of data){
+test(`TestName User - ${d.userName}`,async ({page})=>{
+............
+});
+} 
+//this test will run for 2 times as array have 2 sets of data
+
+--------------
+> AI LLM
+--------------
+In new playwright inspector when a test failed, it will automatically provide a "copy prompt" button in console which is useful to give a prompt to AI model like copilot  or chatgpt to give quick resolution
+
+
+--------------------------------------------
+> To run from different playwright.config1.js
+--------------------------------------------
+
+For Ex: you have playwright.config.js [chrome and headed] and playwright.config1.js [webkit, headless]
+
+Then in terminal > npx playwright test tests/UiTesting.spec.js --config playwright.config1.js  //by default it will consider playwright.config.js
+
+Instead of maintaining 2 config files for 2 types of settings
+create an array of projects as below in playwright.config.js
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { 
+        browserName: 'chromium', //firefox, webkit
+        headless: false, //headmode or headless
+        screenshot:'only-on-failure', //only when error
+        trace: 'on', //logging like log4j
+        viewport: {width:720,height:720},
+      },
+    },
+    {
+      name: 'firefox',
+      use: { 
+        ...devices['Desktop Firefox'] //['iPhone 11'] can mention available devices
+      },
+    },
+    {
+      name: 'webkit',
+      use: { 
+        browserName: 'webkit', 
+        headless: false, //headmode or headless
+        screenshot:'off', //for every action
+        trace: 'on', //logging like log4j
+      },
+    },
+  ],
+
+
+After arranging projects in config file
+Then in terminal > npx playwright test tests/UiTesting.spec.js --project=webkit //if we don't mention any project specifically, then all 3 defined will execute in 3 workers
+
+-------------------
+> SSL Certificate 
+-------------------
+For few websites starts with http:// instead of https://
+Not Secure/ Your Connection is not private errors
+
+Playwright automatically ignores by moving to advanced and accepts it using ignoreHttpErrors:true
+
+    {
+      name: 'firefox',
+      use: { 
+        ...devices['Desktop Firefox']
+        ignoreHTTPSErrors: true, //bypass SSL Certificate Errors
+      },
+    },
+
+----------------------
+> Geo Location popups
+----------------------
+
+For few sites it asks geo location permissons.. playwright automatically handles that
+    {
+      name: 'firefox',
+      use: { 
+        ...devices['Desktop Firefox'],
+        ignoreHTTPSErrors: true,
+        permissions:['geolocation'],// allows gerlocation to the site
+      },
+    },
+
+------------------
+> Video Recordings
+------------------
+
+'off' - Do not record video.
+'on' - Record video for each test.
+'retain-on-failure' - Record video for each test, but remove all videos from successful test runs.
+'on-first-retry' - Record video only when retrying a test for the first time.
+
+
+import { defineConfig } from '@playwright/test';
+export default defineConfig({
+  use: {
+    video: {
+      mode: 'on-first-retry',
+      size: { width: 640, height: 480 }
+    }
+  },
+});
+
+--------------
+> Retry Tests
+--------------
+
+Add retries:1 in config level not in project or use array level bcoz it applicable to whole configuration
+
+------------------------------
+> Series & Parallel Execution
+------------------------------
+
+By default all spec.js files will run in Parallel & all tests in each spec.js file will run in Series 
+
+
+To run tests in spec.js parallel add below in that spec.js file
+
+test.describe.configure({mode:'parallel'});
+
+test.describe.configure({mode:'serial'}); //if we explicitly mention serial then tests inside that spec file will be skipped if any one TC is failed kind of dependancy
+
+
+----------------
+> Tagging Tests
+----------------
+
+Writing @<Tag> inside testName and grep(regular expression) to filter only specified tags for execution
+
+
+test(' @Web Client APp Login ', async ({page})=> {
+....
+}),
+
+In terminal > npx playwright test --grep @Web
+ 
+--------------
+> HTML Reports
+--------------
+
+Allure Reports : npm i -D @playwright/test allure-playwright
+i for installation
+-D for parameter
+
+To generate Allure reports: 
+npm playwright test <path/tag> --reporter=line,allure-playwright 
+//line will generate a text format report which will be utilised by allure to create allure reports
+
+//after above command execution afolder with allure-results will be cfreated with all required json and img contents
+allure generate ./allure-results --clean 
+
+// after executing above command a new folder will be created naming allure-report where main report will be generated 
+allure open ./allure-report
+
+
+-------------------------
+> Creating custom scripts
+-------------------------
+
+In package.json we can define scripts like below and can execute through CLI
+
+ "scripts": {
+    "test": "npx playwright test tests/ApiTesting.spec.js --headed",
+    "regression": "npx playwright test",
+    "WebTests": "npx playwright test --grep @Web",
+    "ApiTests": "npx playwright test --grep @Api",
+    "safari": "npx playwright test --project=safari"
+  },
+
+Then in terminal: 
+npm run WebTests //this will directly point to package.json and search in scripts and execute assigned to it
+
+----------
+> Jenkins
+----------
+
+Jenkins Integration
+
+New Item > Give name as Playwright > Select Freestyle project > Click OK
+Peoject Configutaion page will opens
+Gerenal configuration settings > Git/ Local > local path directory
+Select command prompt shell/bash
+give command as npm run regression
+
+
+---------------------------
+> Playwright from JS to TS
+---------------------------
+
+TS is superset of JS
+
+Javascript - Dynamic typing (automatically identify str or int)
+TypeSCript - Static typing ( explicitly need to mention data type)
+
+to run demo.js -> node demo.js
+to run demo.ts -> tsc demo.ts -> creates demo.js.. then -> node demo.js
+
+Playwright supports TypeScript out of the box. You just write tests in TypeScript, and Playwright will read them, transform to JavaScript and run.
+
+//If we not mention strong typing, then .ts file will throw error at compilation but still compiles to .js and runs the .js file in .js format.
+
+npm install --save-dev typescript //installs typescript
+
+> Class - Exports
+
+in JS:
+------
+
+const {LoginPage} = require('./LoginPage');
+
+class LoginPage{
+
+}
+module.exports = {LoginPage} //need to export at last
+
+in TS:
+------
+import {LoginPage} from './LoginPage';
+
+export class LoginPage{ //export class level
+}
+
+--------------
+> Cucumber JS
+--------------
+
+npm install @cucumber/cucumber --save-dev
+
+After installing cucumber and writing cucumber feature file 
+To generate cucumber skeleton step defenitions, dry run the feature file
+
+in terminal:
+npx cucumber-js 
+//will search folder in node-modules... inside that code written ro check features folder in entire directory and executes/dryryns all feature files and generates skeleton step defs..
+
+to run specific feature file
+npx cucumber-js feature/login.feature --exit
+
+> World Constuctor - Cucumber Playwright:
+------------------------------------------
+
+using this.
+
+this.loginPageObj = new LoginPage(page) //this. will allow to use the same object (means like global variable) in any other method as long as that methods stays in the same test scenario
+
+> Hooks in Cucumber:
+---------------------
+const {BeforeAll, BeforeStep, Before, After, AfterStep, AfterAll} = require('@cucumber/cucumber');
+
+BeforeAll(function () {
+  // perform some shared setup for all scenarios 
+});
+
+BeforeAll(function(){
+  //performs before for each scenario
+});
+
+BeforeScenario(function(){
+  //performs before every step
+});
+
+> Tags:
+--------
+to run
+npx cucumber-js --tags "@Regression" --exit 
+//runs all tags which have tag @Regression
+// --exit Ensures the process quits immediately after the tests are finished, regardless of any lingering background asynchronous tasks.
+
+Tags can also used in hooks
+
+Before({tags:"@Regression" and "Sanity"}, function(){
+//will execute before scenarios only having both tags
+}) 
+
+
+> Parameterization:
+--------------------
+Scenario Outline:
+	Given..When..Then..
+Examples:
+	| UserName | Password |
+	| admin1   | pass123  |
+	| admin2   | pass124  |
+
+> Parallel Execution:
+---------------------
+Cucumber can only runs Test Scenarios in parallel - Not features
+
+in Terminal:
+npx cucumber-js features/Login.feature --parallel 2 --exit
+//here 2 means like 2 threads.. 2 scenarios will run paralely at a time
+
+> HTMl Reports:
+----------------
+in Terminal:
+npx cucumber-js features/Login.feature --exit --format html:cucumber-report.html
+
+> Rerun Failed:
+---------------
+In Configuraion file:
+{retry:1}
+
+In Terminal:
+npx cucumner-js features/Login.feature --retry 1 --exit
+
+In package.json in scripts:
+
+"scripts":{
+  "Cucumber":"npx cucumner-js features/Login.feature --retry 1 --exit"
+}
+
+npm run Cucumber //to run in CLI
+
+//In cucumberhtml report it will not show flaky like playwright default report of it rerun 
+
+
+-------------------------------------------------------------------------
+> E2E Playwright Devops Soluton using Azure Cloud Parallel hosting & CICD 
+-------------------------------------------------------------------------
+... skipped .. need to check after
+
+-------
+> GenAI
+-------
+
+MCP - Model Contect Protocal
+we need to train or model that if we give snippet like below
+
+navigate to "url"
+login ewith admin , pass123
+check cart and logout
+
+It should able to undestand natural english language and selects relevant cod and methods to write code accordingly and execute automatically
+
+Change copilot to agent mode in VS code
+In servers add @playwright/mcp
+
+Give prompt and follow accordingly in copilot chat section... it will generate code
+
+---------
+> FAQ
+----------
+
+00:21 - Can a JavaScript object hold a function as a property? Explain with an example.
+
+03:28 - What are anonymous functions in JavaScript? Define their syntax and implementation.
+
+07:22 - What is the difference between var, const, and let? Explain with an example.
+
+16:26 - Where are the push, pop, slice, shift, and unshift methods used when accessing array elements?
+
+23:19 - Is JavaScript Asynchronous? Prove with an example.
+
+27:53 - What are callback functions in JavaScript?
+
+38:09 - What are promises in JavaScript? Explain the difference between callback functions and promises with an example.
+
+49:15 - Create an inheritance relationship between a parent and child class. Invoke the parent constructor from the child class. Create main.js to call parent class methods from a child class object.
+
+55:21 - From the above code, explain how the super and this keywords help achieve the solution.
+
+01:00:05 - What is the difference between == and ===?
+
+01:03:32 - What is the difference between null and undefined in JavaScript?
+
+01:06:36 - A classic programming interview question that involves using array methods (filter, map, reduce), and JavaScript objects.
+
+
