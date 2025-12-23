@@ -193,13 +193,22 @@ console.log(person.age) //25
 console.log(person.location) //Canada
 console.log(person.fullName()) //Tim Joe
 
-
+--------------
 > Inheritence
 --------------
 
 const Person = require("./path") //importing parent class
-class Pet extends Person{ //inheriting
-  constructor(fName,lName){ //if parent class have any constuctor, then cbaild must implement same, that's rule of inheritance, constructor should be sames
-    super(fName,lName) //call parent class constructor
+
+class Pet extends Person{   //inheriting
+  
+  get location(){
+    return "BlueCross";
+  }
+  constructor(fName,lName){ //if parent class have any constuctor, then child must implement same with parameters, that's rule of inheritance, constructor should be same
+    super(fName,lName)      //call parent class constructor
   }
 }
+
+let pet = new Pet("sam","san");
+pet.fullName(); //samsam - method called from parent class which is not defined in child class
+console.log(pet.location); //BlueCross - Overrides parent class's Canada ... if Blue cross is not defiled in child... then Canada will be picked from parent
