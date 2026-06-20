@@ -1,0 +1,19 @@
+{
+  "name": "playwright_project",
+  "version": "1.0.0",
+  "description": "Playwright Practice",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test tests/ApiTesting.spec.js --headed",
+    "regression": "npx playwright test",
+    "WebTests": "npx playwright test --grep @Web",
+    "ApiTests": "npx playwright test --grep @Api",
+    "safari": "npx playwright test --project=safari"
+  },
+  "author": "i_vrajesh",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^20.14.10"
+  }
+}
