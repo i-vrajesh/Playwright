@@ -147,3 +147,16 @@ npx playwright --version
 ---
 
 Happy Testing 🚀
+
+---
+
+## Author
+
+**Rajesh Vatluri**
+GitHub: [@i-vrajesh](https://github.com/i-vrajesh)
+
+---
+
+## License
+
+This project is intended for **educational, learning, and interview preparation** purposes only.
